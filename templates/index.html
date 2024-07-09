@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Blog Generator</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="icon" href="{% static 'favicon.ico' %}" type="image/x-icon">
+    <style>
+        .load {
+            border: 16px solid #f3f3f3; /* Light grey */
+            border-top: 16px solid #3498db; /* Blue */
+            border-radius: 50%;
+            width: 120px;
+            height: 120px;
+            animation: spin 2s linear infinite;
+            margin: auto;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen bg-gray-100 font-sans antialiased">
+    <!-- Navbar -->
+    <nav class="bg-blue-600 p-4 text-white flex justify-between">
+        <div>
+            <h1 class="text-3xl font-bold">AI Blog Generator</h1>
+        </div>
+    <div>
+    <a href="/" class="text-white hover:underline mr-4">Welcome {{user.username}}</a>
+    <a href="/blog-list" class="text-white hover:underline mr-4">Saved Blog Posts</a>
+    <a href="/logout" class="text-white hover:underline mr-4">Logout</a>
+    </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="flex-grow container mx-auto mt-10 px-4 sm:px-0">
+        <div class="max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-md transition-transform transform hover:scale-105 flex flex-col">
+            <div class="text-center">
+                <h2 class="text-2xl font-semibold mb-4">Welcome to the AI Blog Generator</h2>
+                <p class="text-gray-700">
+                    Generate blog articles from YouTube videos using artificial intelligence.
+                    Simply enter the link of the YouTube video.
+                </p>
+            </div>
+            <br>
+            <!-- YouTube Section -->
+            <div>
+                <h2 class="text-xl mb-4 font-semibold">Enter YouTube Video Link</h2>
+                <div class="flex space-x-4">
+                    <input id="youtubeLink" type="url" placeholder="Paste YouTube Link..." class="flex-grow p-2 border border-blue-400 rounded-l-md">
+                    <button id="generateBlogButton" class="bg-blue-600 text-white px-4 py-2 rounded-r-md hover:bg-blue-700 transition-colors">Generate</button>
+                </div>
+            </div>
+            <!-- Loading Circle -->
+            <div style="display: none;" id="loading-circle" class="load"></div>
+            <!-- Generated Blog Display Section -->
+            <section class="mt-10 flex-grow">
+                <h2 class="text-xl mb-4 font-semibold">Generated Blog Article</h2>
+                <div id="blogContent" class="mt-2 text-gray-700 space-y-4"></div>
+            </section>
+        </div>
+    </div>
+
+    <footer class="text-center p-4 text-black mt-6">
+        Powered by Ashwani
+    </footer>
+
+    <script>
+        document.getElementById('generateBlogButton').addEventListener('click', async () => {
+            const youtubeLink = document.getElementById('youtubeLink').value;
+            const blogContent = document.getElementById('blogContent');
+
+            if (youtubeLink) {
+                document.getElementById('loading-circle').style.display = 'block';
+
+                blogContent.innerHTML = ''; // Clear previous content
+
+                const endpointUrl = '/generate-blog';
+
+                try {
+                    const response = await fetch(endpointUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ link: youtubeLink })
+                    });
+
+                    const data = await response.json();
+
+                    blogContent.innerHTML = data.content;
+
+                } catch (error) {
+                    console.error("Error occurred:", error);
+                    alert("Something went wrong. Please try again later.");
+                }
+                document.getElementById('loading-circle').style.display = 'none';
+            } else {
+                alert("Please enter a YouTube link.");
+            }
+        });
+    </script>
+</body>
+</html>
